@@ -1,0 +1,19 @@
+# ninja log v5
+4	52	0	D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/CMakeFiles/cmake.verify_globs	8023ae62e9597f3f
+45	4143	8020534437071330	rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir/react/renderer/components/rnasyncstorage/States.cpp.o	4ece75c7be49bdec
+106	4214	8020534437491905	RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/States.cpp.o	30d93d48b755f583
+19	4354	8020534439115534	rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir/react/renderer/components/rnasyncstorage/EventEmitters.cpp.o	81219095bdfb3e09
+85	4368	8020534439451173	RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/EventEmitters.cpp.o	20e54cf152ad16dc
+120	4814	8020534443787238	RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/ShadowNodes.cpp.o	f253842b12a8899e
+37	4879	8020534444608755	rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir/react/renderer/components/rnasyncstorage/ShadowNodes.cpp.o	d89e8c5b735c1c9e
+64	4881	8020534444553295	rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir/react/renderer/components/rnasyncstorage/rnasyncstorageJSI-generated.cpp.o	ffa623cac07ed4b7
+95	4918	8020534444951037	RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/Props.cpp.o	7c87df4ee4f4b809
+130	4922	8020534445001055	RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/react/renderer/components/RNCNetInfoSpec/RNCNetInfoSpecJSI-generated.cpp.o	5bc61ca0c0dc4a19
+29	4983	8020534445686573	rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir/react/renderer/components/rnasyncstorage/Props.cpp.o	aeec2d7c75efd231
+54	5169	8020534447222365	rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir/rnasyncstorage-generated.cpp.o	cead7f5e3ae40a21
+10	5187	8020534447658485	CMakeFiles/appmodules.dir/D_/Projects/nhai/NHAI/android/app/build/generated/rncli/src/main/jni/rncli.cpp.o	3dc41d253f2c173c
+75	5194	8020534447738439	RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir/RNCNetInfoSpec-generated.cpp.o	1e550d729ec20065
+5169	5346	8020534449321332	D:/Projects/nhai/NHAI/android/app/build/intermediates/cxx/Debug/283y18q6/obj/x86/libreact_codegen_rnasyncstorage.so	47df39ae508606ed
+5195	5356	8020534449409636	D:/Projects/nhai/NHAI/android/app/build/intermediates/cxx/Debug/283y18q6/obj/x86/libreact_codegen_RNCNetInfoSpec.so	c2aa7e8a1d1bc7a8
+2	5499	8020534450705431	CMakeFiles/appmodules.dir/OnLoad.cpp.o	5faca98538d1e26
+5500	5726	8020534453125614	D:/Projects/nhai/NHAI/android/app/build/intermediates/cxx/Debug/283y18q6/obj/x86/libappmodules.so	1444a9de34015c66

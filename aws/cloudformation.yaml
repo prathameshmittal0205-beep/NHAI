@@ -1,0 +1,200 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  NHAI Datalake 3.0 — Attendance Sync Backend.
+  Deploys API Gateway + Lambda + DynamoDB for receiving encrypted
+  attendance log payloads from offline-first mobile devices.
+
+Parameters:
+  Stage:
+    Type: String
+    Default: prod
+    AllowedValues: [dev, staging, prod]
+    Description: Deployment stage name
+
+  LogRetentionDays:
+    Type: Number
+    Default: 90
+    Description: Number of days to retain attendance logs before TTL expiry
+
+  LambdaMemoryMB:
+    Type: Number
+    Default: 256
+    Description: Lambda function memory allocation in MB
+
+  LambdaTimeoutSeconds:
+    Type: Number
+    Default: 15
+    Description: Lambda function timeout in seconds
+
+Resources:
+
+  # ============================================================
+  # DynamoDB Table — NHAIAttendanceLogs
+  # ============================================================
+  AttendanceLogsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub 'NHAIAttendanceLogs-${Stage}'
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: log_id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: log_id
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      Tags:
+        - Key: Project
+          Value: NHAI-Datalake-3.0
+        - Key: Stage
+          Value: !Ref Stage
+
+  # ============================================================
+  # IAM Role — Lambda Execution Role (Least Privilege)
+  # ============================================================
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'nhai-attendance-lambda-role-${Stage}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: !Sub 'nhai-dynamodb-access-${Stage}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:Query
+                Resource: !GetAtt AttendanceLogsTable.Arn
+
+  # ============================================================
+  # Lambda Function — Attendance Webhook
+  # ============================================================
+  AttendanceWebhookFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'nhai-attendance-webhook-${Stage}'
+      Runtime: python3.10
+      Handler: attendance_webhook.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      MemorySize: !Ref LambdaMemoryMB
+      Timeout: !Ref LambdaTimeoutSeconds
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref AttendanceLogsTable
+          STAGE: !Ref Stage
+          LOG_RETENTION_DAYS: !Ref LogRetentionDays
+      Code:
+        ZipFile: |
+          # Placeholder — deploy the real code via `aws lambda update-function-code`
+          # or package aws/attendance_webhook.py into a deployment zip.
+          def lambda_handler(event, context):
+              return {'statusCode': 200, 'body': 'placeholder'}
+      Tags:
+        - Key: Project
+          Value: NHAI-Datalake-3.0
+        - Key: Stage
+          Value: !Ref Stage
+
+  # ============================================================
+  # API Gateway — REST API
+  # ============================================================
+  AttendanceApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub 'nhai-attendance-api-${Stage}'
+      Description: NHAI Datalake 3.0 Attendance Sync API
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+
+  # Resource: /attendance
+  AttendanceResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref AttendanceApi
+      ParentId: !GetAtt AttendanceApi.RootResourceId
+      PathPart: attendance
+
+  # Resource: /attendance/sync
+  SyncResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref AttendanceApi
+      ParentId: !Ref AttendanceResource
+      PathPart: sync
+
+  # Method: POST /attendance/sync
+  SyncPostMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref AttendanceApi
+      ResourceId: !Ref SyncResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${AttendanceWebhookFunction.Arn}/invocations'
+
+  # Lambda Permission for API Gateway
+  ApiGatewayInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !GetAtt AttendanceWebhookFunction.Arn
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${AttendanceApi}/*'
+
+  # API Gateway Deployment
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    DependsOn: SyncPostMethod
+    Properties:
+      RestApiId: !Ref AttendanceApi
+
+  # API Gateway Stage
+  ApiStage:
+    Type: AWS::ApiGateway::Stage
+    Properties:
+      RestApiId: !Ref AttendanceApi
+      DeploymentId: !Ref ApiDeployment
+      StageName: !Ref Stage
+      MethodSettings:
+        - HttpMethod: '*'
+          ResourcePath: '/*'
+          ThrottlingBurstLimit: 50
+          ThrottlingRateLimit: 25
+
+Outputs:
+  ApiEndpoint:
+    Description: API Gateway endpoint URL for attendance sync
+    Value: !Sub 'https://${AttendanceApi}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/attendance/sync'
+    Export:
+      Name: !Sub 'nhai-attendance-api-endpoint-${Stage}'
+
+  DynamoDBTableName:
+    Description: DynamoDB table name for attendance logs
+    Value: !Ref AttendanceLogsTable
+
+  DynamoDBTableArn:
+    Description: DynamoDB table ARN
+    Value: !GetAtt AttendanceLogsTable.Arn
+
+  LambdaFunctionArn:
+    Description: Lambda function ARN
+    Value: !GetAtt AttendanceWebhookFunction.Arn

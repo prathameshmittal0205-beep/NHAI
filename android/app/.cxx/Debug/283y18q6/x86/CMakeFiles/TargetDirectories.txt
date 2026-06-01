@@ -1,0 +1,9 @@
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/CMakeFiles/appmodules.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/CMakeFiles/edit_cache.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/CMakeFiles/rebuild_cache.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/rnasyncstorage_autolinked_build/CMakeFiles/react_codegen_rnasyncstorage.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/rnasyncstorage_autolinked_build/CMakeFiles/edit_cache.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/rnasyncstorage_autolinked_build/CMakeFiles/rebuild_cache.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/RNCNetInfoSpec_autolinked_build/CMakeFiles/react_codegen_RNCNetInfoSpec.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/RNCNetInfoSpec_autolinked_build/CMakeFiles/edit_cache.dir
+D:/Projects/nhai/NHAI/android/app/.cxx/Debug/283y18q6/x86/RNCNetInfoSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
