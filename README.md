@@ -1,6 +1,11 @@
-# NHAI Datalake 3.0 — Attendance System
+# NHAI Datalake 3.0 — Offline Facial Recognition & Attendance System
 
-An offline-first, edge-AI attendance system built for NHAI field personnel. It performs on-device facial recognition (INT8 quantized MobileFaceNet) and liveness detection in zero-connectivity environments.
+> 🌐 **Live Website:** https://nhaiwebsite.vercel.app
+
+An edge-deployed offline facial recognition and liveness detection system built for NHAI field operations.
+Sub-second inference. Zero connectivity required. AES-256 encrypted sync to AWS when online.
+
+---
 
 ## Architecture
 
@@ -86,3 +91,18 @@ Update `src/config/env.ts` with this URL under the `prod` key.
 1. **Low-Light Failure**: The MobileFaceNet model will struggle in pitch-black environments without device flash.
 2. **Device Hardware Limits**: Android devices with <3GB RAM may experience thermal throttling during sustained 3D Face Mesh liveness tracking.
 3. **Time Sync**: If the device's clock is fully desynced while offline, the payload `encrypted_at` timestamp will be inaccurate (Lambda logs the server-side `received_at` to compensate).
+
+## 🌐 Live Website
+
+The project has a live interactive website showcasing all features:
+
+**https://nhaiwebsite.vercel.app**
+
+| Page | Description |
+|------|-------------|
+| `/` | Homepage with architecture diagram and system overview |
+| `/demo` | Live in-browser face registration and liveness verification |
+| `/dashboard` | Mock attendance dashboard with AWS sync simulation |
+| `/about` | Technical deep-dive, build phases, and accuracy metrics |
+
+> Built with Next.js, deployed on Vercel. The demo runs 100% in the browser using face-api.js — no backend required.
