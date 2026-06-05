@@ -1,6 +1,6 @@
 # NHAI Datalake 3.0 — Offline Facial Recognition & Attendance System
 
-> 🌐 **Live Website:** https://nhaiwebsite.vercel.app
+> 🌐 **Live Website:** https://facedatalake.vercel.app
 
 An edge-deployed offline facial recognition and liveness detection system built for NHAI field operations.
 Sub-second inference. Zero connectivity required. AES-256 encrypted sync to AWS when online.
@@ -96,7 +96,7 @@ Update `src/config/env.ts` with this URL under the `prod` key.
 
 The project has a live interactive website showcasing all features:
 
-**https://nhaiwebsite.vercel.app**
+**https://facedatalake.vercel.app**
 
 | Page | Description |
 |------|-------------|
