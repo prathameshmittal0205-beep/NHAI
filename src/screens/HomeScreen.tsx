@@ -353,11 +353,7 @@ const HomeScreen: React.FC = () => {
 
   // Listen to real network state changes
   useEffect(() => {
-    // TODO: Wire up actual SyncManager instance to update networkState and pendingCount
-    // const unsubscribe = syncManager.onNetworkChange((state) => {
-    //   setNetworkState(state);
-    // });
-    // return unsubscribe;
+    // SyncManager integration is pending
   }, []);
 
   // --- Get current challenge type for LivenessPrompt ---

@@ -1,9 +1,9 @@
 buildscript {
     ext {
-        
         minSdkVersion = 24
         compileSdkVersion = 34
         targetSdkVersion = 34
+        // Pinned to a version compatible with Reanimated 3.6.1 and RN 0.73
         ndkVersion = "27.1.12297006"
         kotlinVersion = "2.1.20"
     }
