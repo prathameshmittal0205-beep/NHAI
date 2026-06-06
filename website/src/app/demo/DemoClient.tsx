@@ -328,9 +328,17 @@ export default function Demo() {
               if (currentChallenge === 'blink') {
                 const leftEye = detection.landmarks.getLeftEye();
                 const rightEye = detection.landmarks.getRightEye();
-                const eyeOpenness = (Math.abs(leftEye[1].y - leftEye[5].y) + Math.abs(rightEye[1].y - rightEye[5].y)) / 2;
                 
-                if (eyeOpenness < 5.0) { 
+                const getEAR = (eye: any[]) => {
+                  const v1 = Math.hypot(eye[1].x - eye[5].x, eye[1].y - eye[5].y);
+                  const v2 = Math.hypot(eye[2].x - eye[4].x, eye[2].y - eye[4].y);
+                  const h = Math.hypot(eye[0].x - eye[3].x, eye[0].y - eye[3].y);
+                  return (v1 + v2) / (2.0 * h);
+                };
+                
+                const avgEAR = (getEAR(leftEye) + getEAR(rightEye)) / 2;
+                
+                if (avgEAR < 0.22) { 
                   setChallengesPassed(prev => [...prev, 'blink']);
                   addLog("Blink Confirmed ✓");
                   setCurrentChallenge('smile');
@@ -338,7 +346,7 @@ export default function Demo() {
                   updateFeedback("Please blink your eyes");
                 }
               } else if (currentChallenge === 'smile') {
-                if (detection.expressions.happy > 0.8) {
+                if (detection.expressions.happy > 0.7) {
                   setChallengesPassed(prev => [...prev, 'smile']);
                   addLog("Smile Confirmed ✓");
                   setCurrentChallenge('turn');
@@ -348,15 +356,14 @@ export default function Demo() {
               } else if (currentChallenge === 'turn') {
                 const jaw = detection.landmarks.getJawOutline();
                 const nose = detection.landmarks.getNose()[0];
-                const leftDist = nose.x - jaw[0].x;
-                const rightDist = jaw[16].x - nose.x;
+                const headWidth = jaw[16].x - jaw[0].x;
+                const leftRatio = (nose.x - jaw[0].x) / headWidth;
                 
-                if (Math.abs(leftDist - rightDist) > 30) {
+                if (Math.abs(leftRatio - 0.5) > 0.15) {
                   setChallengesPassed(prev => [...prev, 'turn']);
                   addLog("Liveness Passed ✓");
                   setCurrentChallenge(null);
                   
-                   
                   if (mode === 'verify') verifyFaceFromRef();
                 } else {
                   updateFeedback("Please turn your head slightly");
