@@ -207,6 +207,13 @@ export default function Demo() {
     }
   }, [addLog]);
 
+  useEffect(() => {
+    if (stream && videoRef.current && videoRef.current.srcObject !== stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(e => console.error("Error playing video:", e));
+    }
+  }, [stream]);
+
   const updateFeedback = useCallback((msg: string) => {
     if (lastFeedback.current !== msg) {
       lastFeedback.current = msg;
@@ -501,8 +508,8 @@ export default function Demo() {
             </div>
 
             <div className="relative w-full aspect-[4/3] bg-black rounded-2xl border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
-              <video ref={videoRef} autoPlay muted playsInline className={clsx("absolute inset-0 w-full h-full object-cover -scale-x-100", (!stream || !isModelsLoaded) && "hidden")} />
-              <canvas ref={canvasRef} className={clsx("absolute inset-0 w-full h-full object-cover z-10 pointer-events-none", (!stream || !isModelsLoaded) && "hidden")} />
+              <video ref={videoRef} autoPlay muted playsInline className={clsx("absolute inset-0 w-full h-full object-cover -scale-x-100", (!stream || !isModelsLoaded) ? "opacity-0" : "opacity-100")} />
+              <canvas ref={canvasRef} className={clsx("absolute inset-0 w-full h-full object-cover z-10 pointer-events-none", (!stream || !isModelsLoaded) ? "opacity-0" : "opacity-100")} />
               
               {!isModelsLoaded ? (
                 <div className="absolute inset-0 flex items-center justify-center text-cyan-500 bg-slate-950/80 z-20">

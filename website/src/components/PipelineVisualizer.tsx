@@ -16,13 +16,13 @@ const STAGES = [
 export default function PipelineVisualizer({ currentStage }: { currentStage: number }) {
   return (
     <div className="w-full bg-slate-900/50 border border-slate-800 rounded-2xl p-4 md:p-6 overflow-x-auto custom-scrollbar shadow-lg">
-      <div className="flex min-w-[600px] justify-between relative">
+      <div className="flex min-w-[600px] justify-between relative z-0">
         {/* Background Line */}
-        <div className="absolute left-5 right-5 top-[20px] -translate-y-1/2 h-1 bg-slate-800 z-0 rounded-full" />
+        <div className="absolute left-5 right-5 top-[20px] -translate-y-1/2 h-1 bg-slate-800 -z-10 rounded-full" />
         
         {/* Active Line Fill */}
         <motion.div 
-          className="absolute left-5 top-[20px] -translate-y-1/2 h-1 bg-cyan-500 z-0 rounded-full"
+          className="absolute left-5 top-[20px] -translate-y-1/2 h-1 bg-cyan-500 -z-10 rounded-full"
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(100, (currentStage / (STAGES.length - 1)) * 100)}%` }}
           transition={{ duration: 0.5 }}
