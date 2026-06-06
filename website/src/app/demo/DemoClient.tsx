@@ -58,7 +58,6 @@ export default function Demo() {
   const lastFeedback = useRef<string>("");
   const noFaceSince = useRef<number | null>(null);
   const isRunning = useRef<boolean>(false);
-  const stateRef = useRef({ currentChallenge, challengesPassed, isProcessing, mode, viewMode });
   const liveDescriptorRef = useRef<Float32Array | null>(null);
   const lastFrameTime = useRef<number>(0);
 
@@ -66,6 +65,8 @@ export default function Demo() {
   const [registeredFaces, setRegisteredFaces] = useState<{id: string, name: string, registeredAt: string}[]>([]);
   const [registerName, setRegisterName] = useState("");
   const [registerId, setRegisterId] = useState("");
+  
+  const stateRef = useRef({ currentChallenge, challengesPassed, isProcessing, mode, viewMode, registerName, registerId });
 
   function verifyFaceFromRef() {
     if (!liveDescriptorRef.current) return;
