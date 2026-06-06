@@ -158,16 +158,19 @@ export default function Demo() {
       if (!ms) ms = await navigator.mediaDevices.getUserMedia({ video: true });
 
       setStream(ms);
-      if (videoRef.current) {
-        videoRef.current.srcObject = ms;
-        videoRef.current.play();
-      }
       addLog("Camera stream active ✓");
       setPipelineStage(1); // Capture complete
     } catch (err) {
       addLog("Error: Camera access denied ❌");
     }
   }, [addLog]);
+
+  useEffect(() => {
+    if (stream && videoRef.current && videoRef.current.srcObject !== stream) {
+      videoRef.current.srcObject = stream;
+      videoRef.current.play().catch(e => console.error("Error playing video:", e));
+    }
+  }, [stream]);
 
   const updateFeedback = useCallback((msg: string) => {
     if (lastFeedback.current !== msg) {
@@ -512,12 +515,12 @@ export default function Demo() {
                 </div>
               ) : (
                 <>
-                  <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100 opacity-80" />
+                  <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
                   <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none" />
                   
                   {/* Challenge Overlay */}
                   {currentChallenge && (
-                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm pointer-events-none">
+                    <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/30 pointer-events-none">
                       <div className="relative w-40 h-40 flex items-center justify-center mb-6">
                         <svg className="absolute inset-0 w-full h-full -rotate-90">
                           <circle cx="80" cy="80" r="76" stroke="rgba(245, 158, 11, 0.2)" strokeWidth="8" fill="none" />

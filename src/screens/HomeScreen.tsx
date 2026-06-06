@@ -29,6 +29,7 @@ import {
   StatusBar,
   Platform,
 } from 'react-native';
+import { Camera, useCameraDevice, useCameraPermission } from 'react-native-vision-camera';
 
 import LivenessPrompt from '../components/LivenessPrompt';
 import RecognitionResult from '../components/RecognitionResult';
@@ -59,6 +60,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const CameraViewPlaceholder: React.FC<{ isActive: boolean }> = ({ isActive }) => {
   const pulseAnim = useRef(new Animated.Value(0.6)).current;
+  const device = useCameraDevice('front');
+  const { hasPermission } = useCameraPermission();
 
   useEffect(() => {
     if (isActive) {
@@ -87,6 +90,13 @@ const CameraViewPlaceholder: React.FC<{ isActive: boolean }> = ({ isActive }) =>
     <View style={styles.cameraContainer}>
       {/* Simulated camera feed background */}
       <View style={styles.cameraFeed}>
+        {isActive && device && hasPermission && (
+          <Camera
+            style={StyleSheet.absoluteFill}
+            device={device}
+            isActive={true}
+          />
+        )}
         {/* Face outline guide */}
         <Animated.View
           style={[
@@ -251,6 +261,8 @@ const HomeScreen: React.FC = () => {
   const [isResuming, setIsResuming] = useState(false);
   const [resumableState, setResumableState] = useState<AppFlowState | null>(null);
 
+  const { hasPermission, requestPermission } = useCameraPermission();
+
   // --- Session Checkpoint Logic ---
   useEffect(() => {
     SessionCheckpoint.load().then((savedState) => {
@@ -283,10 +295,14 @@ const HomeScreen: React.FC = () => {
 
   // --- Handlers ---
 
-  const handleStartAttendance = useCallback(() => {
+  const handleStartAttendance = useCallback(async () => {
+    if (!hasPermission) {
+      const permission = await requestPermission();
+      if (!permission) return;
+    }
     setFlowState('liveness_blink');
     setCurrentChallengeIndex(0);
-  }, []);
+  }, [hasPermission, requestPermission]);
 
   const handleChallengeComplete = useCallback(
     (success: boolean) => {
