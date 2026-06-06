@@ -11,7 +11,7 @@ export default function Particles() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let particles: {x: number, y: number, radius: number, vx: number, vy: number}[] = [];
+    const particles: {x: number, y: number, radius: number, vx: number, vy: number}[] = [];
     const particleCount = 50;
 
     const resize = () => {

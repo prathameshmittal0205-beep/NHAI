@@ -31,7 +31,6 @@ export default function PipelineVisualizer({ currentStage }: { currentStage: num
         {STAGES.map((stage, idx) => {
           const isCompleted = idx < currentStage;
           const isActive = idx === currentStage;
-          const isPending = idx > currentStage;
 
           return (
             <div key={stage} className="relative z-10 flex flex-col items-center gap-2">

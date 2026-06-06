@@ -23,7 +23,7 @@ export default function About() {
           </h1>
           
           <p className="text-xl md:text-2xl text-slate-400 max-w-4xl mx-auto leading-relaxed mb-16">
-            A production-grade offline facial recognition system engineered for NHAI's most demanding environments — zero connectivity, sub-second inference, tamper-proof.
+            A production-grade offline facial recognition system engineered for NHAI&apos;s most demanding environments — zero connectivity, sub-second inference, tamper-proof.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4">

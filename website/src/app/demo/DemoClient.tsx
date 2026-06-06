@@ -60,11 +60,49 @@ export default function Demo() {
   const isRunning = useRef<boolean>(false);
   const stateRef = useRef({ currentChallenge, challengesPassed, isProcessing, mode, viewMode });
   const liveDescriptorRef = useRef<Float32Array | null>(null);
-  const lastFrameTime = useRef<number>(Date.now());
+  const lastFrameTime = useRef<number>(0);
 
   // Registered Faces
   const [registeredFaces, setRegisteredFaces] = useState<{id: string, name: string, registeredAt: string}[]>([]);
 
+  function verifyFaceFromRef() {
+    if (!liveDescriptorRef.current) return;
+    setIsProcessing(true);
+    setPipelineStage(4);
+    addLog("Extracting facial embeddings...");
+    
+    try {
+      const storedData = localStorage.getItem('nhai_registered_faces');
+      if (!storedData) throw new Error("No database");
+      
+      const storedFaces = JSON.parse(storedData);
+      setPipelineStage(5);
+      addLog("Computing Cosine Similarity...");
+
+      let bestMatch = { name: "", distance: 1.0 };
+      for (const face of storedFaces) {
+        const storedDescriptor = new Float32Array(face.embedding);
+        const distance = faceapi.euclideanDistance(liveDescriptorRef.current, storedDescriptor);
+        if (distance < bestMatch.distance) bestMatch = { name: face.name, distance };
+      }
+
+      const matchScore = parseFloat(Math.max(0, 100 - (bestMatch.distance * 100)).toFixed(1));
+      setPipelineStage(6);
+      
+      if (bestMatch.distance < 0.5) { 
+        addLog(`Identity Verified — ${bestMatch.name} (${matchScore}%) ✓`);
+        setResult({ success: true, msg: "Access Granted", score: matchScore, name: bestMatch.name });
+      } else {
+        addLog(`Match Failed — Unknown Identity ❌`);
+        setResult({ success: false, msg: "Access Denied", score: matchScore });
+      }
+    } catch (e) {
+      addLog("Verification Failed: No profiles found ❌");
+      setResult({ success: false, msg: "Access Denied" });
+    } finally {
+      setIsProcessing(false);
+    }
+  };
   useEffect(() => {
     const loadFaces = () => {
       const data = localStorage.getItem('nhai_registered_faces');
@@ -145,7 +183,7 @@ export default function Demo() {
 
       setAvailableCameras(videoDevices);
       let ms: MediaStream | null = null;
-      let targetIndex = deviceIndex % Math.max(1, videoDevices.length);
+      const targetIndex = deviceIndex % Math.max(1, videoDevices.length);
 
       if (videoDevices.length > 0) {
         const device = videoDevices[targetIndex];
@@ -314,6 +352,7 @@ export default function Demo() {
                   addLog("Liveness Passed ✓");
                   setCurrentChallenge(null);
                   
+                   
                   if (mode === 'verify') verifyFaceFromRef();
                 } else {
                   updateFeedback("Please turn your head slightly");
@@ -370,12 +409,12 @@ export default function Demo() {
       addLog(`Saving profile: ${name.trim()}`);
       
       const existingData = localStorage.getItem('nhai_registered_faces');
-      let faces: any[] = [];
+      let faces: {id: string, name: string, embedding: number[], registeredAt: string}[] = [];
       if (existingData) try { faces = JSON.parse(existingData); } catch (e) {}
       faces.push(newEntry);
       localStorage.setItem('nhai_registered_faces', JSON.stringify(faces));
       
-      setRegisteredFaces(faces.map((f: any) => ({ id: f.id, name: f.name, registeredAt: f.registeredAt })));
+      setRegisteredFaces(faces.map((f) => ({ id: f.id, name: f.name, registeredAt: f.registeredAt })));
       addLog("Registration Complete ✓");
       setPipelineStage(6);
       setResult({ success: true, msg: "Face registered successfully." });
@@ -388,44 +427,6 @@ export default function Demo() {
     }
   };
 
-  const verifyFaceFromRef = () => {
-    if (!liveDescriptorRef.current) return;
-    setIsProcessing(true);
-    setPipelineStage(4);
-    addLog("Extracting facial embeddings...");
-    
-    try {
-      const storedData = localStorage.getItem('nhai_registered_faces');
-      if (!storedData) throw new Error("No database");
-      
-      const storedFaces = JSON.parse(storedData);
-      setPipelineStage(5);
-      addLog("Computing Cosine Similarity...");
-
-      let bestMatch = { name: "", distance: 1.0 };
-      for (const face of storedFaces) {
-        const storedDescriptor = new Float32Array(face.embedding);
-        const distance = faceapi.euclideanDistance(liveDescriptorRef.current, storedDescriptor);
-        if (distance < bestMatch.distance) bestMatch = { name: face.name, distance };
-      }
-
-      const matchScore = parseFloat(Math.max(0, 100 - (bestMatch.distance * 100)).toFixed(1));
-      setPipelineStage(6);
-      
-      if (bestMatch.distance < 0.5) { 
-        addLog(`Identity Verified — ${bestMatch.name} (${matchScore}%) ✓`);
-        setResult({ success: true, msg: "Access Granted", score: matchScore, name: bestMatch.name });
-      } else {
-        addLog(`Match Failed — Unknown Identity ❌`);
-        setResult({ success: false, msg: "Access Denied", score: matchScore });
-      }
-    } catch (e) {
-      addLog("Verification Failed: No profiles found ❌");
-      setResult({ success: false, msg: "Access Denied" });
-    } finally {
-      setIsProcessing(false);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-50 font-sans flex flex-col pt-20 pb-12">
@@ -596,7 +597,7 @@ export default function Demo() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">ID:</span>
-                    <span className="text-white">NHAI-{Math.floor(Math.random() * 9000) + 1000}</span>
+                    <span className="text-white">NHAI-{result.name ? result.name.length * 1024 + 1000 : 1000}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Confidence:</span>

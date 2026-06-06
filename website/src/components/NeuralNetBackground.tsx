@@ -20,7 +20,7 @@ export default function NeuralNetBackground() {
     const numParticles = Math.floor((width * height) / 15000);
     const maxDistance = 150;
 
-    let mouse = { x: -1000, y: -1000 };
+    const mouse = { x: -1000, y: -1000 };
 
     class Particle {
       x: number;
