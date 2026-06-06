@@ -196,19 +196,16 @@ export default function Demo() {
       if (!ms) ms = await navigator.mediaDevices.getUserMedia({ video: true });
 
       setStream(ms);
+      if (videoRef.current) {
+        videoRef.current.srcObject = ms;
+        videoRef.current.play().catch(e => console.error("Error playing video:", e));
+      }
       addLog("Camera stream active ✓");
       setPipelineStage(1); // Capture complete
     } catch (err) {
       addLog("Error: Camera access denied ❌");
     }
   }, [addLog]);
-
-  useEffect(() => {
-    if (stream && videoRef.current && videoRef.current.srcObject !== stream) {
-      videoRef.current.srcObject = stream;
-      videoRef.current.play().catch(e => console.error("Error playing video:", e));
-    }
-  }, [stream]);
 
   const updateFeedback = useCallback((msg: string) => {
     if (lastFeedback.current !== msg) {
@@ -504,20 +501,20 @@ export default function Demo() {
             </div>
 
             <div className="relative w-full aspect-[4/3] bg-black rounded-2xl border border-slate-800 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
+              <video ref={videoRef} autoPlay muted playsInline className={clsx("absolute inset-0 w-full h-full object-cover -scale-x-100", (!stream || !isModelsLoaded) && "hidden")} />
+              <canvas ref={canvasRef} className={clsx("absolute inset-0 w-full h-full object-cover z-10 pointer-events-none", (!stream || !isModelsLoaded) && "hidden")} />
+              
               {!isModelsLoaded ? (
-                <div className="absolute inset-0 flex items-center justify-center text-cyan-500">
+                <div className="absolute inset-0 flex items-center justify-center text-cyan-500 bg-slate-950/80 z-20">
                   <RefreshCw className="w-8 h-8 animate-spin" />
                 </div>
               ) : !stream ? (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-950/80 z-20">
                   <button onClick={() => startCamera(0)} className="bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/50 text-cyan-400 px-6 py-3 rounded-lg font-bold uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)] hover:shadow-[0_0_25px_rgba(34,211,238,0.4)]">
                     Initialize Feed
                   </button>
                 </div>
-              ) : (
-                <>
-                  <video ref={videoRef} autoPlay muted playsInline className="absolute inset-0 w-full h-full object-cover -scale-x-100" />
-                  <canvas ref={canvasRef} className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none" />
+              ) : null}
                   
                   {/* Challenge Overlay */}
                   {currentChallenge && (
@@ -551,8 +548,6 @@ export default function Demo() {
                     <span className="uppercase tracking-widest">{feedback}</span>
                     <span className="text-cyan-500 animate-pulse flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-cyan-500" /> LIVE</span>
                   </div>
-                </>
-              )}
             </div>
 
             {/* Controls & Pipeline */}

@@ -35,11 +35,12 @@ export default function PipelineVisualizer({ currentStage }: { currentStage: num
           return (
             <div key={stage} className="relative z-10 flex flex-col items-center gap-2">
               <div 
+                style={{ backgroundColor: '#020617' }}
                 className={clsx(
                   "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative z-20",
-                  isCompleted ? "bg-[#020617] border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
-                  isActive ? "bg-[#020617] border-cyan-500 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.6)] animate-pulse" :
-                  "bg-[#020617] border-slate-700 text-slate-600"
+                  isCompleted ? "border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.4)]" :
+                  isActive ? "border-cyan-500 text-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.6)] animate-pulse" :
+                  "border-slate-700 text-slate-600"
                 )}
               >
                 {isCompleted ? <CheckCircle2 className="w-5 h-5" /> : isActive ? <CircleDashed className="w-5 h-5 animate-spin-slow" /> : <span className="text-xs font-bold">{idx + 1}</span>}
