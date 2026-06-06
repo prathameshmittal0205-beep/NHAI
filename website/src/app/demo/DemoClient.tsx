@@ -23,7 +23,7 @@ export default function Demo() {
   
   const [feedback, setFeedback] = useState("System Standby. Position face in frame.");
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<{success: boolean, msg: string, score?: number, name?: string} | null>(null);
+  const [result, setResult] = useState<{success: boolean, msg: string, score?: number, name?: string, empId?: string} | null>(null);
   
   // HUD states
   const [confidence, setConfidence] = useState(0);
@@ -64,6 +64,8 @@ export default function Demo() {
 
   // Registered Faces
   const [registeredFaces, setRegisteredFaces] = useState<{id: string, name: string, registeredAt: string}[]>([]);
+  const [registerName, setRegisterName] = useState("");
+  const [registerId, setRegisterId] = useState("");
 
   function verifyFaceFromRef() {
     if (!liveDescriptorRef.current) return;
@@ -91,7 +93,7 @@ export default function Demo() {
       
       if (bestMatch.distance < 0.5) { 
         addLog(`Identity Verified — ${bestMatch.name} (${matchScore}%) ✓`);
-        setResult({ success: true, msg: "Access Granted", score: matchScore, name: bestMatch.name });
+        setResult({ success: true, msg: "Access Granted", score: matchScore, name: bestMatch.name, empId: storedFaces.find((f: any) => f.name === bestMatch.name)?.id || 'UNKNOWN' });
       } else {
         addLog(`Match Failed — Unknown Identity ❌`);
         setResult({ success: false, msg: "Access Denied", score: matchScore });
@@ -133,8 +135,8 @@ export default function Demo() {
   };
 
   useEffect(() => {
-    stateRef.current = { currentChallenge, challengesPassed, isProcessing, mode, viewMode };
-  }, [currentChallenge, challengesPassed, isProcessing, mode, viewMode]);
+    stateRef.current = { currentChallenge, challengesPassed, isProcessing, mode, viewMode, registerName, registerId };
+  }, [currentChallenge, challengesPassed, isProcessing, mode, viewMode, registerName, registerId]);
 
   // Load models
   useEffect(() => {
@@ -231,7 +233,7 @@ export default function Demo() {
 
     const detect = async () => {
       if (!isRunning.current) return;
-      const { isProcessing, currentChallenge, challengesPassed, mode, viewMode } = stateRef.current;
+      const { isProcessing, currentChallenge, challengesPassed, mode, viewMode, registerName, registerId } = stateRef.current;
 
       if (!videoRef.current || !canvasRef.current || isProcessing) {
         requestAnimationFrame(detect);
@@ -365,6 +367,7 @@ export default function Demo() {
                   setCurrentChallenge(null);
                   
                   if (mode === 'verify') verifyFaceFromRef();
+                  if (mode === 'register') registerFace(registerName, registerId);
                 } else {
                   updateFeedback("Please turn your head slightly");
                 }
@@ -403,7 +406,7 @@ export default function Demo() {
     addLog("Initiating Liveness Detection protocol...");
   };
 
-  const registerFace = async (name: string) => {
+  const registerFace = async (name: string, empId: string) => {
     if (!liveDescriptorRef.current) return;
     setIsProcessing(true);
     setPipelineStage(4);
@@ -411,7 +414,7 @@ export default function Demo() {
     
     try {
       const newEntry = {
-         id: crypto.randomUUID(),
+         id: empId,
          name: name.trim(),
          embedding: Array.from(liveDescriptorRef.current),
          registeredAt: new Date().toISOString()
@@ -566,9 +569,27 @@ export default function Demo() {
 
             {/* Controls & Pipeline */}
             <div className="mt-6 space-y-6">
+              {mode === 'register' && (
+                <div className="flex gap-4">
+                  <input 
+                    type="text" 
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    placeholder="Full Name"
+                    className="flex-1 bg-black border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 font-mono placeholder:text-slate-600"
+                  />
+                  <input 
+                    type="text" 
+                    value={registerId}
+                    onChange={(e) => setRegisterId(e.target.value)}
+                    placeholder="Employee ID"
+                    className="flex-1 bg-black border border-slate-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500 font-mono placeholder:text-slate-600"
+                  />
+                </div>
+              )}
               <button 
                 onClick={startLivenessCheck}
-                disabled={!stream || isProcessing || currentChallenge !== null}
+                disabled={!stream || isProcessing || currentChallenge !== null || (mode === 'register' && (!registerName.trim() || !registerId.trim()))}
                 className="w-full bg-slate-900 hover:bg-slate-800 border border-slate-700 disabled:opacity-50 text-white px-6 py-4 rounded-xl font-bold uppercase tracking-wider transition-all shadow-lg flex items-center justify-center gap-3"
               >
                 <ScanFace className="w-5 h-5 text-cyan-400" /> 
@@ -606,7 +627,7 @@ export default function Demo() {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">ID:</span>
-                    <span className="text-white">NHAI-{result.name ? result.name.length * 1024 + 1000 : 1000}</span>
+                    <span className="text-white">{result.empId || 'UNKNOWN'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Confidence:</span>
@@ -631,25 +652,7 @@ export default function Demo() {
               </div>
             )}
             
-            {/* Name Input for Registration Mode overlaying Result space */}
-            {mode === 'register' && challengesPassed.length === 3 && !result && (
-              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-2xl">
-                <h3 className="font-bold text-cyan-400 mb-3 uppercase tracking-wider text-sm">Target Acquired</h3>
-                <input 
-                  type="text" 
-                  id="regName"
-                  placeholder="Enter Agent Name"
-                  className="w-full bg-black border border-slate-700 rounded-lg px-4 py-3 text-white mb-4 text-center focus:outline-none focus:border-cyan-500 font-mono placeholder:text-slate-600"
-                />
-                <button 
-                  onClick={() => registerFace((document.getElementById('regName') as HTMLInputElement).value)}
-                  className="w-full bg-cyan-600/20 hover:bg-cyan-600/40 border border-cyan-500/50 text-cyan-400 py-3 rounded-lg font-bold tracking-widest uppercase transition-all shadow-[0_0_15px_rgba(34,211,238,0.2)]"
-                >
-                  Confirm Profile
-                </button>
-              </div>
-            )}
-
+            {/* Old Registration popup removed */}
           </div>
         </div>
       </div>
